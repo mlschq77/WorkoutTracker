@@ -1,0 +1,97 @@
+﻿@model IEnumerable<WorkoutTracker.Models.WorkoutSession>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h1>💪 Ostatnie treningi</h1>
+    </div>
+    <div class="col text-end">
+        <a asp-controller="WorkoutSessions" asp-action="Create" class="btn btn-success">+ Nowa sesja</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Filtruj po planie treningowym</label>
+                <select name="planId" class="form-select">
+                    <option value="">-- Wszystkie plany --</option>
+                    @foreach (var item in ViewBag.Plans as SelectList)
+                    {
+                        <option value="@item.Value" selected="@item.Selected">@item.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filtruj</button>
+            </div>
+            @if (ViewBag.SelectedPlan != null)
+            {
+                <div class="col-md-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100">Wyczyść</a>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Brak sesji treningowych. <a asp-controller="WorkoutSessions" asp-action="Create">Dodaj pierwszą!</a>
+    </div>
+}
+else
+{
+    @foreach (var session in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <strong>@session.Date.ToString("dd.MM.yyyy")</strong>
+                <span class="badge bg-primary">@session.WorkoutPlan.Name</span>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(session.Notes))
+                {
+                    <p class="text-muted">📝 @session.Notes</p>
+                }
+                @if (session.SessionExercises != null && session.SessionExercises.Any())
+                {
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Ćwiczenie</th>
+                                <th>Serie</th>
+                                <th>Powtórzenia</th>
+                                <th>Ciężar (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var se in session.SessionExercises)
+                            {
+                                <tr>
+                                    <td>@se.Exercise.Name</td>
+                                    <td>@se.Sets</td>
+                                    <td>@se.Reps</td>
+                                    <td>@(se.Weight.HasValue? se.Weight + " kg" : "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">Brak ćwiczeń w tej sesji.</p>
+                }
+            </div>
+            <div class="card-footer text-end">
+                <a asp-controller="WorkoutSessions" asp-action="Details" asp-route-id="@session.WorkoutSessionId" class="btn btn-sm btn-outline-primary">Szczegóły</a>
+                <a asp-controller="WorkoutSessions" asp-action="Edit" asp-route-id="@session.WorkoutSessionId" class="btn btn-sm btn-outline-warning">Edytuj</a>
+            </div>
+        </div>
+    }
+}
