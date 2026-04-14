@@ -23,5 +23,6 @@ namespace WorkoutTracker.Models
         public string MuscleGroup { get; set; } = null!;
 
         public virtual ICollection<SessionExercise>? SessionExercises { get; set; }
+        public string Category { get; set; } = null!;
     }
 }

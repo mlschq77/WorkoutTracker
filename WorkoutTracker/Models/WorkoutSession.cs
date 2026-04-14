@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace WorkoutTracker.Models
 {
@@ -9,24 +8,26 @@ namespace WorkoutTracker.Models
         [Key]
         public int WorkoutSessionId { get; set; }
 
-        [Required(ErrorMessage = "Podaj datę treningu")]
+        [Required(ErrorMessage = "Data jest wymagana")]
         [Display(Name = "Data treningu")]
         [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime Date { get; set; }
 
-        [MaxLength(300)]
+        [Required(ErrorMessage = "Podaj czas trwania")]
+        [Display(Name = "Czas trwania (minuty)")]
+        public int DurationMinutes { get; set; }
+
         [Display(Name = "Notatki")]
         public string? Notes { get; set; }
 
-        [ForeignKey("WorkoutPlan")]
+        // Relacja do Planu
+        [Required(ErrorMessage = "Musisz wybrać plan")]
         [Display(Name = "Plan treningowy")]
         public int WorkoutPlanId { get; set; }
 
-        [ValidateNever]
-        public virtual WorkoutPlan WorkoutPlan { get; set; } = null!;
+        [ForeignKey("WorkoutPlanId")]
+        public virtual WorkoutPlan? WorkoutPlan { get; set; }
 
-        [ValidateNever]
-        public virtual ICollection<SessionExercise>? SessionExercises { get; set; }
+        public virtual ICollection<SessionExercise> SessionExercises { get; set; } = new List<SessionExercise>();
     }
 }

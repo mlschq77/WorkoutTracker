@@ -11,5 +11,6 @@ namespace WorkoutTracker.Data
         public DbSet<WorkoutPlan> WorkoutPlans { get; set; }
         public DbSet<WorkoutSession> WorkoutSessions { get; set; }
         public DbSet<SessionExercise> SessionExercises { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

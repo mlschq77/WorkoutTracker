@@ -1,5 +1,6 @@
-using WorkoutTracker.Data;
 using Microsoft.EntityFrameworkCore;
+using WorkoutTracker.Data;
+using WorkoutTracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 var connectionString = builder.Configuration.GetConnectionString("WorkoutDB");
 builder.Services.AddDbContext<WorkoutContext>(x => x.UseSqlServer(connectionString));
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    });
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -21,7 +30,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAuthorization();
 
 app.MapControllerRoute(

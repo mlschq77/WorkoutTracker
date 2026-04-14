@@ -1,47 +1,38 @@
 @model IEnumerable<WorkoutTracker.Models.WorkoutSession>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Sesje treningowe";
 }
 
-<h1>Index</h1>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🔥 Twoje sesje</h2>
+        <a asp-action="Create" class="btn btn-primary">Dodaj nowy trening</a>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Date)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Notes)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.WorkoutPlan)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Notes)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.WorkoutPlan.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.WorkoutSessionId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.WorkoutSessionId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.WorkoutSessionId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <table class="table table-hover shadow-sm bg-white rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>Data</th>
+                <th>Plan</th>
+                <th>Czas (min)</th>
+                <th>Opcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Date.ToShortDateString()</td>
+                    <td>@item.WorkoutPlan?.Name</td>
+                    <td>@item.DurationMinutes</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.WorkoutSessionId" class="btn btn-sm btn-info">Szczegóły</a>
+                        <a asp-action="Edit" asp-route-id="@item.WorkoutSessionId" class="btn btn-sm btn-warning">Edytuj</a>
+                        <a asp-action="Delete" asp-route-id="@item.WorkoutSessionId" class="btn btn-sm btn-danger">Usuń</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

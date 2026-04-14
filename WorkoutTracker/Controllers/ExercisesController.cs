@@ -1,15 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WorkoutTracker.Data;
 using WorkoutTracker.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WorkoutTracker.Controllers
 {
+    [Authorize] // Domyślnie wymagaj logowania dla wszystkich akcji
     public class ExercisesController : Controller
     {
         private readonly WorkoutContext _context;
@@ -20,25 +17,31 @@ namespace WorkoutTracker.Controllers
         }
 
         // GET: Exercises
-        public async Task<IActionResult> Index()
+        [AllowAnonymous] // Publiczny dostęp do listy i wyszukiwania
+        public async Task<IActionResult> Index(string searchString)
         {
-            return View(await _context.Exercises.ToListAsync());
+            var exercises = from e in _context.Exercises
+                            select e;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                exercises = exercises.Where(s => s.Name!.Contains(searchString)
+                                              || s.Category!.Contains(searchString));
+            }
+
+            return View(await exercises.ToListAsync());
         }
 
         // GET: Exercises/Details/5
+        [AllowAnonymous] // Publiczny dostęp do szczegółów
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var exercise = await _context.Exercises
                 .FirstOrDefaultAsync(m => m.ExerciseId == id);
-            if (exercise == null)
-            {
-                return NotFound();
-            }
+
+            if (exercise == null) return NotFound();
 
             return View(exercise);
         }
@@ -50,11 +53,9 @@ namespace WorkoutTracker.Controllers
         }
 
         // POST: Exercises/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ExerciseId,Name,Description,MuscleGroup")] Exercise exercise)
+        public async Task<IActionResult> Create([Bind("ExerciseId,Name,Description,Category")] Exercise exercise)
         {
             if (ModelState.IsValid)
             {
@@ -68,30 +69,19 @@ namespace WorkoutTracker.Controllers
         // GET: Exercises/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var exercise = await _context.Exercises.FindAsync(id);
-            if (exercise == null)
-            {
-                return NotFound();
-            }
+            if (exercise == null) return NotFound();
             return View(exercise);
         }
 
         // POST: Exercises/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ExerciseId,Name,Description,MuscleGroup")] Exercise exercise)
+        public async Task<IActionResult> Edit(int id, [Bind("ExerciseId,Name,Description,Category")] Exercise exercise)
         {
-            if (id != exercise.ExerciseId)
-            {
-                return NotFound();
-            }
+            if (id != exercise.ExerciseId) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -102,14 +92,8 @@ namespace WorkoutTracker.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ExerciseExists(exercise.ExerciseId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!ExerciseExists(exercise.ExerciseId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -119,17 +103,11 @@ namespace WorkoutTracker.Controllers
         // GET: Exercises/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var exercise = await _context.Exercises
                 .FirstOrDefaultAsync(m => m.ExerciseId == id);
-            if (exercise == null)
-            {
-                return NotFound();
-            }
+            if (exercise == null) return NotFound();
 
             return View(exercise);
         }
